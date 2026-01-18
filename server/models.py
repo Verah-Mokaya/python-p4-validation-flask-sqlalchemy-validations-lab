@@ -12,6 +12,18 @@ class Author(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     # Add validators 
+    @validates('name')
+    def validate_name(self, key, value):
+        if not value or value.strip() == "":
+            raise ValueError("Author name cannot be empty")
+        return value
+    
+    @validates('phone_number')
+    def validate_phone_number(self, key, value):
+        if not value and not value.isdigit() or len(value) != 10:
+            raise ValueError("Phone number must contain 10 digits")
+        return value
+
 
     def __repr__(self):
         return f'Author(id={self.id}, name={self.name})'
@@ -28,7 +40,30 @@ class Post(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     # Add validators  
-
+    @validates('content')
+    def validate_content(self, key, value):
+        if not value or value.strip() == "" or len(value) < 250:
+            raise ValueError("Content cannot be more than 250 characters")
+        return value
+    @validates('summary')
+    def validate_summary(self, key, value):
+        if not value or len(value) > 250:
+            raise ValueError("Summary cannot be more than 250 characters")
+        return value
+    
+    @validates('category')
+    def validate_category(self, key, value):
+        allowed_categories = ['Fiction', 'Non-Fiction']
+        if value not in allowed_categories:
+            raise ValueError(f"Category must be one of {allowed_categories}")
+        return value
+    
+    @validates('title')
+    def validate_clickbait(self, key, value):
+        keywords = ["Won't Believe", "Secret", "Top", "Guess"]
+        if not any(keyword in value for keyword in keywords):
+            raise ValueError("Title must contain clickbait keywords")
+        return value
 
     def __repr__(self):
         return f'Post(id={self.id}, title={self.title} content={self.content}, summary={self.summary})'
